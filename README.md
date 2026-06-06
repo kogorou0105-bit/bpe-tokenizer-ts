@@ -16,7 +16,9 @@ text -> initial token ids -> pair statistics -> merge rules -> encode/decode
 - Decode token ids back to text.
 - Create a convenient tokenizer object with `createTokenizer`.
 - Export and import models with JSON-compatible data.
+- Train, encode, and decode files from the CLI.
 - Run tests with Vitest.
+- Keep the package entry separate from the runnable demo.
 
 ## Commands
 
@@ -51,6 +53,32 @@ npm run typecheck
 npm run build
 ```
 
+## CLI
+
+Train a model from a text file:
+
+```bash
+npm run cli -- train --input corpus.txt --output tokenizer.json --max-merges 100
+# After package installation:
+tokenize train --input corpus.txt --output tokenizer.json --max-merges 100
+```
+
+Encode a text file into token ids:
+
+```bash
+npm run cli -- encode --model tokenizer.json --input input.txt --output ids.json
+# After package installation:
+tokenize encode --model tokenizer.json --input input.txt --output ids.json
+```
+
+Decode token ids back to text:
+
+```bash
+npm run cli -- decode --model tokenizer.json --input ids.json --output decoded.txt
+# After package installation:
+tokenize decode --model tokenizer.json --input ids.json --output decoded.txt
+```
+
 ## Example API
 
 ```ts
@@ -70,7 +98,6 @@ const json = tokenizer.toJSON();
 - This is a teaching-oriented BPE implementation, not a GPT/tiktoken-compatible tokenizer.
 - Encoding currently only supports characters present in the training text.
 - There is no byte-level fallback yet.
-- The demo entry and package entry are not separated yet.
 - Pair statistics are recomputed from scratch after every merge.
 
 See `.note/` for deferred design concerns discovered during development.
