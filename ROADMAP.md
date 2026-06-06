@@ -4,8 +4,6 @@ This project is still a learning-oriented BPE tokenizer, but the next work shoul
 
 ## Near Term
 
-- Add a serialized model `version` field before treating JSON model files as stable.
-- Strengthen `importModel` validation, especially byte vocabulary and merge rule references.
 - Add `vocabSize` as a higher-level training option in addition to raw `maxMerges`.
 - Add `tokenizer.tokenize(text)` or an inspection helper that returns token ids with token text.
 - Cover empty input, single-byte input, Chinese text, emoji, and malformed model files in tests.

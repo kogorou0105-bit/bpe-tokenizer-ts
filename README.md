@@ -17,6 +17,7 @@ text -> initial token ids -> pair statistics -> merge rules -> encode/decode
 - Fall back to UTF-8 byte tokens for characters not seen during training.
 - Create a convenient tokenizer object with `createTokenizer`.
 - Export and import models with JSON-compatible data.
+- Validate serialized model version, mode, vocabulary, and merge rules on import.
 - Train, encode, and decode files from the CLI.
 - Run tests with Vitest.
 - Keep the package entry separate from the runnable demo.

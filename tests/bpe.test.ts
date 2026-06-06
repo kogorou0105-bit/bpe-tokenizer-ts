@@ -48,6 +48,8 @@ describe("model serialization", () => {
 
     const serialized = exportModel(result.model);
 
+    expect(serialized.version).toBe(1);
+    expect(serialized.mode).toBe("byte-level-bpe");
     expect(serialized.vocabulary).toHaveLength(258);
     expect(serialized.vocabulary[0]).toEqual({ id: 0, text: "\0" });
     expect(serialized.vocabulary[97]).toEqual({ id: 97, text: "a" });
@@ -116,6 +118,55 @@ describe("model serialization", () => {
         vocabulary: [...serialized.vocabulary, { id: (tokenId as number) + 100, text: tokenText as string }],
       }),
     ).toThrow(/Duplicate token text/);
+  });
+
+  it("rejects unsupported serialized model versions", () => {
+    const serialized = exportModel(trainBpe("abc", { maxMerges: 1 }).model);
+
+    expect(() => importModel({ ...serialized, version: 2 })).toThrow(/Unsupported serialized model version/);
+  });
+
+  it("rejects unsupported serialized model modes", () => {
+    const serialized = exportModel(trainBpe("abc", { maxMerges: 1 }).model);
+
+    expect(() => importModel({ ...serialized, mode: "character-bpe" })).toThrow(/Unsupported serialized model mode/);
+  });
+
+  it("rejects serialized models missing byte vocabulary entries", () => {
+    const serialized = exportModel(trainBpe("abc", { maxMerges: 1 }).model);
+
+    expect(() =>
+      importModel({
+        ...serialized,
+        vocabulary: serialized.vocabulary.filter((token) => token.id !== 0),
+      }),
+    ).toThrow(/Missing byte token id/);
+  });
+
+  it("rejects merge rules that reference unknown token ids", () => {
+    const serialized = exportModel(trainBpe("abab", { maxMerges: 1 }).model);
+    const [firstRule] = serialized.mergeRules;
+
+    expect(firstRule).toBeDefined();
+    expect(() =>
+      importModel({
+        ...serialized,
+        mergeRules: [{ ...(firstRule as NonNullable<typeof firstRule>), left: 9999 }],
+      }),
+    ).toThrow(/unknown left token id/);
+  });
+
+  it("rejects merge rules whose token text does not match the merged pair", () => {
+    const serialized = exportModel(trainBpe("abab", { maxMerges: 1 }).model);
+    const [firstRule] = serialized.mergeRules;
+
+    expect(firstRule).toBeDefined();
+    expect(() =>
+      importModel({
+        ...serialized,
+        mergeRules: [{ ...(firstRule as NonNullable<typeof firstRule>), tokenText: "ba" }],
+      }),
+    ).toThrow(/tokenText mismatch/);
   });
 });
 
