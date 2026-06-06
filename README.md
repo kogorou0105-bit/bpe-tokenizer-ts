@@ -14,6 +14,7 @@ text -> initial token ids -> pair statistics -> merge rules -> encode/decode
 - Learn multiple merge rules with `maxMerges`.
 - Encode text with a trained model.
 - Decode token ids back to text.
+- Fall back to UTF-8 byte tokens for characters not seen during training.
 - Create a convenient tokenizer object with `createTokenizer`.
 - Export and import models with JSON-compatible data.
 - Train, encode, and decode files from the CLI.
@@ -79,6 +80,18 @@ npm run cli -- decode --model tokenizer.json --input ids.json --output decoded.t
 tokenize decode --model tokenizer.json --input ids.json --output decoded.txt
 ```
 
+## Project Structure
+
+- `src/bpe.ts`: core BPE training, encode/decode, and tokenizer facade.
+- `src/types.ts`: shared tokenizer, model, token, and training result types.
+- `src/utf8.ts`: UTF-8 byte fallback helpers and 256-byte base vocabulary constants.
+- `src/pairs.ts`: pair keys, pair statistics, most-frequent-pair selection, and pair merging.
+- `src/model.ts`: vocabulary lookup plus model import/export.
+- `src/cli.ts`: command-line train/encode/decode entry point.
+- `src/demo.ts`: runnable learning/demo script.
+- `tests/`: Vitest test suite for public entry points and BPE behavior.
+- `ROADMAP.md`: follow-up feature directions and architectural next steps.
+
 ## Example API
 
 ```ts
@@ -96,8 +109,6 @@ const json = tokenizer.toJSON();
 ## MVP Limitations
 
 - This is a teaching-oriented BPE implementation, not a GPT/tiktoken-compatible tokenizer.
-- Encoding currently only supports characters present in the training text.
-- There is no byte-level fallback yet.
 - Pair statistics are recomputed from scratch after every merge.
 
-See `.note/` for deferred design concerns discovered during development.
+See `ROADMAP.md` for planned directions and `.note/` for deferred design concerns discovered during development.

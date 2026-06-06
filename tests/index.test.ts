@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTokenizer, decode, encode, exportModel, importModel, trainBpe } from "./index.js";
+import { createTokenizer, decode, encode, exportModel, importModel, trainBpe } from "../src/index.js";
 
 describe("package entry", () => {
   it("exports the public tokenizer API", () => {
