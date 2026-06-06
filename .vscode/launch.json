@@ -2,14 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug src/index.ts",
+      "name": "Debug src/demo.ts",
       "type": "node",
       "request": "launch",
       "runtimeArgs": [
         "--import",
         "tsx"
       ],
-      "program": "${workspaceFolder}/src/index.ts",
+      "program": "${workspaceFolder}/src/demo.ts",
       "cwd": "${workspaceFolder}",
       "skipFiles": [
         "<node_internals>/**"

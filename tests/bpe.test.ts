@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createTokenizer, decode, encode, exportModel, importModel, mergePair, trainBpe } from "./bpe.js";
+import { createTokenizer, decode, encode, exportModel, importModel, mergePair, trainBpe } from "../src/bpe.js";
 
 describe("BPE training", () => {
   it("learns up to maxMerges merge rules", () => {
@@ -31,10 +31,14 @@ describe("BPE training", () => {
     expect(encode(text, result.model)).toEqual(result.tokenIds);
   });
 
-  it("throws when encoding characters outside the trained vocabulary", () => {
+  it("falls back to UTF-8 bytes for characters outside the training text", () => {
     const result = trainBpe("abc", { maxMerges: 1 });
+    const text = "abcd😄";
+    const encoded = encode(text, result.model);
 
-    expect(() => encode("abcd", result.model)).toThrow(/Unknown token text/);
+    expect(encoded).toContain("d".charCodeAt(0));
+    expect(encoded).toEqual(expect.arrayContaining([0xf0, 0x9f, 0x98, 0x84]));
+    expect(decode(encoded, result.model)).toBe(text);
   });
 });
 
@@ -42,32 +46,32 @@ describe("model serialization", () => {
   it("exports the expected JSON-compatible model shape", () => {
     const result = trainBpe("abababab", { maxMerges: 2 });
 
-    expect(exportModel(result.model)).toEqual({
-      vocabulary: [
-        { id: 0, text: "a" },
-        { id: 1, text: "b" },
-        { id: 2, text: "ab" },
-        { id: 3, text: "abab" },
-      ],
-      mergeRules: [
-        {
-          step: 1,
-          left: 0,
-          right: 1,
-          newTokenId: 2,
-          tokenText: "ab",
-          count: 4,
-        },
-        {
-          step: 2,
-          left: 2,
-          right: 2,
-          newTokenId: 3,
-          tokenText: "abab",
-          count: 3,
-        },
-      ],
-    });
+    const serialized = exportModel(result.model);
+
+    expect(serialized.vocabulary).toHaveLength(258);
+    expect(serialized.vocabulary[0]).toEqual({ id: 0, text: "\0" });
+    expect(serialized.vocabulary[97]).toEqual({ id: 97, text: "a" });
+    expect(serialized.vocabulary[98]).toEqual({ id: 98, text: "b" });
+    expect(serialized.vocabulary[256]).toEqual({ id: 256, text: "ab" });
+    expect(serialized.vocabulary[257]).toEqual({ id: 257, text: "abab" });
+    expect(serialized.mergeRules).toEqual([
+      {
+        step: 1,
+        left: 97,
+        right: 98,
+        newTokenId: 256,
+        tokenText: "ab",
+        count: 4,
+      },
+      {
+        step: 2,
+        left: 256,
+        right: 256,
+        newTokenId: 257,
+        tokenText: "abab",
+        count: 3,
+      },
+    ]);
   });
 
   it("preserves encode and decode behavior after JSON roundtrip", () => {
