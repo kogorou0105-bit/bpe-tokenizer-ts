@@ -17,11 +17,40 @@ text -> initial token ids -> pair statistics -> merge rules -> encode/decode
 - Fall back to UTF-8 byte tokens for characters not seen during training.
 - Create a convenient tokenizer object with `createTokenizer`.
 - Export and import models with JSON-compatible data.
+- Validate serialized model version, mode, vocabulary, and merge rules on import.
 - Train, encode, and decode files from the CLI.
 - Run tests with Vitest.
 - Keep the package entry separate from the runnable demo.
 
-## Commands
+## Installation
+
+Install as a project dependency:
+
+```bash
+npm install ts-tokenizer
+```
+
+Install the CLI globally:
+
+```bash
+npm install -g ts-tokenizer
+```
+
+Run the CLI without installing globally by prefixing `tokenize` with `npx --package ts-tokenizer`:
+
+```bash
+npx --package ts-tokenizer tokenize train --input corpus.txt --output tokenizer.json --max-merges 100
+```
+
+Download the published package tarball:
+
+```bash
+npm pack ts-tokenizer
+```
+
+If your npm is configured to a private registry, add `--registry https://registry.npmjs.org` to the install, pack, or npx command.
+
+## Development Commands
 
 Install dependencies:
 
@@ -56,6 +85,8 @@ npm run build
 
 ## CLI
 
+After global installation, the CLI command is `tokenize`.
+
 Train a model from a text file:
 
 ```bash
@@ -80,6 +111,23 @@ npm run cli -- decode --model tokenizer.json --input ids.json --output decoded.t
 tokenize decode --model tokenizer.json --input ids.json --output decoded.txt
 ```
 
+Quick CLI smoke test with the published package:
+
+```bash
+printf "banana bandana banana" > corpus.txt
+printf "banana 😄" > input.txt
+npx --package ts-tokenizer tokenize train --input corpus.txt --output tokenizer.json --max-merges 20
+npx --package ts-tokenizer tokenize encode --model tokenizer.json --input input.txt --output ids.json
+npx --package ts-tokenizer tokenize decode --model tokenizer.json --input ids.json --output decoded.txt
+cat decoded.txt
+```
+
+The final output should be:
+
+```text
+banana 😄
+```
+
 ## Project Structure
 
 - `src/bpe.ts`: core BPE training, encode/decode, and tokenizer facade.
@@ -93,6 +141,12 @@ tokenize decode --model tokenizer.json --input ids.json --output decoded.txt
 - `ROADMAP.md`: follow-up feature directions and architectural next steps.
 
 ## Example API
+
+Install the package first:
+
+```bash
+npm install ts-tokenizer
+```
 
 ```ts
 import { createTokenizer, trainBpe } from "ts-tokenizer";

@@ -23,7 +23,12 @@ export type BpeModel = {
   mergeRules: readonly MergeRule[];
 };
 
+export type SerializedBpeModelVersion = 1;
+export type SerializedBpeModelMode = "byte-level-bpe";
+
 export type SerializedBpeModel = {
+  version: SerializedBpeModelVersion;
+  mode: SerializedBpeModelMode;
   vocabulary: Array<{
     id: TokenId;
     text: TokenText;

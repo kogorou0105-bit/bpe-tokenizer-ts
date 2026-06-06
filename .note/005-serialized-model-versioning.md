@@ -2,22 +2,24 @@
 
 ## Status
 
-Deferred.
+Implemented for the byte-level BPE model format.
 
 ## Current Context
 
-The current serialized model format is intentionally small:
+The current serialized model format is explicit about its version and tokenizer mode:
 
 ```ts
 type SerializedBpeModel = {
-  vocabulary: Array<{ id: number; text: string }>;
+  version: 1;
+  mode: "byte-level-bpe";
+  vocabulary: Array<{ id: TokenId; text: TokenText }>;
   mergeRules: MergeRule[];
 };
 ```
 
-This is enough to JSON roundtrip the current learning model and restore `encode` / `decode` behavior.
+`importModel` validates the version, mode, byte vocabulary, duplicate ids/text, merge rule references, and merge rule token text consistency.
 
-## Potential Problem
+## Resolved Problem
 
 Once the tokenizer format changes, old serialized model files may become ambiguous or impossible to load safely.
 
@@ -33,18 +35,8 @@ Without an explicit format version, `importModel` cannot know which behavior a s
 
 ## When To Revisit
 
-Revisit this before publishing a stable npm API or before writing model files meant to persist outside the current demo.
+Revisit this when a second real model format exists and migrations are needed.
 
-## Likely Direction
-
-Add a format version and keep import validation explicit:
-
-```ts
-type SerializedBpeModel = {
-  version: 1;
-  vocabulary: Array<{ id: number; text: string }>;
-  mergeRules: MergeRule[];
-};
-```
+## Direction
 
 Only add migrations when more than one real format exists.
